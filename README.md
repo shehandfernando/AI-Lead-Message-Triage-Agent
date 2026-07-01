@@ -14,31 +14,36 @@ The architecture decouples the fast ingestion layer from the slower AI inference
 
 ### Data Flow Diagram
 
-```mermaid
 graph TD
     %% Define styles
     classDef external fill:#111,stroke:#333,stroke-width:2px,color:#fff;
     classDef backend fill:#f4f4f4,stroke:#333,stroke-width:2px,color:#000;
     classDef database fill:#e5e5e5,stroke:#333,stroke-width:2px,color:#000;
     classDef ai fill:#fff,stroke:#000,stroke-width:4px,color:#000;
-    
+
     %% Nodes
-    User[Incoming Payload <br/> Instagram / WhatsApp] ::: external
-    API[FastAPI Webhook Receiver <br/> /api/webhook/ingest] ::: backend
-    DB[(MySQL Database)] ::: database
-    Worker{Background Async Worker} ::: backend
-    LLM((LLM API <br/> Intent & Scoring)) ::: ai
-    UI[React Dashboard <br/> /api/leads/queue] ::: external
+    User["Incoming Payload <br/> Instagram / WhatsApp"]
+    API["FastAPI Webhook Receiver <br/> /api/webhook/ingest"]
+    DB[("MySQL Database")]
+    Worker{"Background Async Worker"}
+    LLM(("LLM API <br/> Intent & Scoring"))
+    UI["React Dashboard <br/> /api/leads/queue"]
+
+    %% Apply Classes
+    class User,UI external;
+    class API,Worker backend;
+    class DB database;
+    class LLM ai;
 
     %% Flow
-    User -->|1. POST Raw Message| API
-    API -->|2. Save Raw Data| DB
-    API -.->|3. Instantly Return 202 Accepted| User
-    API -->|4. Delegate Task| Worker
-    Worker -->|5. Send Text/Vision Context| LLM
-    LLM -->|6. Return Structured JSON| Worker
-    Worker -->|7. Update Lead Status| DB
-    UI -->|8. Polls for High-Urgency Leads| DB
+    User -->|"1. POST Raw Message"| API
+    API -->|"2. Save Raw Data"| DB
+    API -.->|"3. Instantly Return 202 Accepted"| User
+    API -->|"4. Delegate Task"| Worker
+    Worker -->|"5. Send Text/Vision Context"| LLM
+    LLM -->|"6. Return Structured JSON"| Worker
+    Worker -->|"7. Update Lead Status"| DB
+    UI -->|"8. Polls for High-Urgency Leads"| DB
 
 ## 🚀 Tech Stack
 
