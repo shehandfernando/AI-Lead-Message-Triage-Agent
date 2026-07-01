@@ -12,6 +12,34 @@ The architecture decouples the fast ingestion layer from the slower AI inference
 2. **The Brain (Background AI):** The payload is pushed to a background worker where the LLM evaluates the text (and flagged visual media), outputting strict JSON containing an `intent_category`, `urgency_score` (1-10), and a `requires_human` boolean.
 3. **The Command Center (React UI):** The frontend continuously polls the queue, rendering only the prioritized, human-required leads in a high-contrast, low-cognitive-load interface.
 
+### Data Flow Diagram
+
+```mermaid
+graph TD
+    %% Define styles
+    classDef external fill:#111,stroke:#333,stroke-width:2px,color:#fff;
+    classDef backend fill:#f4f4f4,stroke:#333,stroke-width:2px,color:#000;
+    classDef database fill:#e5e5e5,stroke:#333,stroke-width:2px,color:#000;
+    classDef ai fill:#fff,stroke:#000,stroke-width:4px,color:#000;
+    
+    %% Nodes
+    User[Incoming Payload <br/> Instagram / WhatsApp] ::: external
+    API[FastAPI Webhook Receiver <br/> /api/webhook/ingest] ::: backend
+    DB[(MySQL Database)] ::: database
+    Worker{Background Async Worker} ::: backend
+    LLM((LLM API <br/> Intent & Scoring)) ::: ai
+    UI[React Dashboard <br/> /api/leads/queue] ::: external
+
+    %% Flow
+    User -->|1. POST Raw Message| API
+    API -->|2. Save Raw Data| DB
+    API -.->|3. Instantly Return 202 Accepted| User
+    API -->|4. Delegate Task| Worker
+    Worker -->|5. Send Text/Vision Context| LLM
+    LLM -->|6. Return Structured JSON| Worker
+    Worker -->|7. Update Lead Status| DB
+    UI -->|8. Polls for High-Urgency Leads| DB
+
 ## 🚀 Tech Stack
 
 * **Backend:** Python, FastAPI, Pydantic
