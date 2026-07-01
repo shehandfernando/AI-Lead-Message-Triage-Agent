@@ -14,6 +14,7 @@ The architecture decouples the fast ingestion layer from the slower AI inference
 
 ### Data Flow Diagram
 
+```mermaid
 graph TD
     %% Define styles
     classDef external fill:#111,stroke:#333,stroke-width:2px,color:#fff;
@@ -44,6 +45,7 @@ graph TD
     LLM -->|"6. Return Structured JSON"| Worker
     Worker -->|"7. Update Lead Status"| DB
     UI -->|"8. Polls for High-Urgency Leads"| DB
+```
 
 ## 🚀 Tech Stack
 
